@@ -8,6 +8,10 @@ const DragDropManager = ({ children }) => {
   const dispatch = useDispatch();
   const currentPhase = useSelector(state => state.phase.currentPhase);
   const currentFactory = useSelector(state => state.focusFactory.currentFactory);
+  const roles = useSelector(state => state.roles.roles[currentFactory] || []);
+  const orgChart = useSelector(state => 
+    state.orgChart.orgCharts[currentPhase]?.[currentFactory] || { nodes: [], connections: [] }
+  );
   
   // Handle drag end event
   const handleDragEnd = (result) => {
@@ -22,25 +26,24 @@ const DragDropManager = ({ children }) => {
     
     // Case 1: Dragging a role from left panel to org chart
     if (source.droppableId === 'rolesList' && destination.droppableId === 'orgChart') {
-      handleRoleDragToOrgChart(draggableId, destination);
+      handleRoleDragToOrgChart(draggableId, destination, roles);
     }
     
     // Case 2: Dragging a person from right panel to a role in org chart
     if (source.droppableId === 'personnelList' && destination.droppableId.startsWith('role-')) {
       const nodeId = destination.droppableId.replace('role-', '');
-      handlePersonnelDragToRole(draggableId, nodeId);
+      handlePersonnelDragToRole(draggableId, nodeId, orgChart);
     }
     
     // Case 3: Rearranging nodes within org chart
     if (source.droppableId === 'orgChart' && destination.droppableId === 'orgChart') {
-      handleNodeRearrangement(draggableId, destination);
+      handleNodeRearrangement(draggableId, destination, orgChart);
     }
   };
   
   // Handle dragging a role from left panel to org chart
-  const handleRoleDragToOrgChart = (roleId, destination) => {
+  const handleRoleDragToOrgChart = (roleId, destination, roles) => {
     // Get the role data
-    const roles = useSelector(state => state.roles.roles[currentFactory] || []);
     const role = roles.find(r => r.id === roleId);
     
     if (!role) return;
@@ -67,11 +70,8 @@ const DragDropManager = ({ children }) => {
   };
   
   // Handle dragging a person from right panel to a role in org chart
-  const handlePersonnelDragToRole = (personId, nodeId) => {
+  const handlePersonnelDragToRole = (personId, nodeId, orgChart) => {
     // Get the current node and person data
-    const orgChart = useSelector(state => 
-      state.orgChart.orgCharts[currentPhase][currentFactory] || { nodes: [], connections: [] }
-    );
     const node = orgChart.nodes.find(n => n.id === nodeId);
     
     if (!node) return;
@@ -93,11 +93,8 @@ const DragDropManager = ({ children }) => {
   };
   
   // Handle rearranging nodes within org chart
-  const handleNodeRearrangement = (nodeId, destination) => {
+  const handleNodeRearrangement = (nodeId, destination, orgChart) => {
     // Get the current org chart data
-    const orgChart = useSelector(state => 
-      state.orgChart.orgCharts[currentPhase][currentFactory] || { nodes: [], connections: [] }
-    );
     const node = orgChart.nodes.find(n => n.id === nodeId);
     
     if (!node) return;
