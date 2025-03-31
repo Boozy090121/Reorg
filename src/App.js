@@ -106,8 +106,20 @@ const initialData = {
 function App() {
   const [data, setData] = useState(() => {
     // Try to load from localStorage
-    const savedData = localStorage.getItem('qualityReorgData');
-    return savedData ? JSON.parse(savedData) : initialData;
+    try {
+      const savedData = localStorage.getItem('qualityReorgData');
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        // Ensure savedConfigurations exists
+        if (!parsedData.savedConfigurations) {
+          parsedData.savedConfigurations = [];
+        }
+        return parsedData;
+      }
+    } catch (error) {
+      console.error("Error loading data from localStorage:", error);
+    }
+    return initialData;
   });
   
   const [snackbar, setSnackbar] = useState({
@@ -133,7 +145,16 @@ function App() {
 
   // Save data to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('qualityReorgData', JSON.stringify(data));
+    try {
+      localStorage.setItem('qualityReorgData', JSON.stringify(data));
+    } catch (error) {
+      console.error("Error saving data to localStorage:", error);
+      setSnackbar({
+        open: true,
+        message: 'Error saving data to local storage',
+        severity: 'error'
+      });
+    }
   }, [data]);
 
   const handlePhaseChange = (event, newPhase) => {
@@ -278,6 +299,10 @@ function App() {
     reader.onload = (e) => {
       try {
         const importedData = JSON.parse(e.target.result);
+        // Ensure savedConfigurations exists
+        if (!importedData.savedConfigurations) {
+          importedData.savedConfigurations = [];
+        }
         setData(importedData);
         setSnackbar({
           open: true,
@@ -445,7 +470,9 @@ function App() {
       data: JSON.parse(JSON.stringify(data))
     };
     
-    const updatedConfigs = [...data.savedConfigurations, newConfig];
+    // Ensure savedConfigurations exists
+    const savedConfigs = Array.isArray(data.savedConfigurations) ? data.savedConfigurations : [];
+    const updatedConfigs = [...savedConfigs, newConfig];
     
     setData({
       ...data,
@@ -478,7 +505,7 @@ function App() {
   };
 
   const handleLoadConfiguration = () => {
-    if (loadDialog.selectedConfig) {
+    if (loadDialog.selectedConfig && Array.isArray(data.savedConfigurations)) {
       const configToLoad = data.savedConfigurations.find(
         config => config.id === loadDialog.selectedConfig
       );
@@ -486,8 +513,15 @@ function App() {
       if (configToLoad) {
         // Preserve the saved configurations list when loading
         const savedConfigs = [...data.savedConfigurations];
+        const loadedData = configToLoad.data;
+        
+        // Ensure savedConfigurations exists in the loaded data
+        if (!loadedData.savedConfigurations) {
+          loadedData.savedConfigurations = [];
+        }
+        
         setData({
-          ...configToLoad.data,
+          ...loadedData,
           savedConfigurations: savedConfigs
         });
         
@@ -504,6 +538,11 @@ function App() {
 
   // Delete saved configuration
   const handleDeleteSavedConfig = (configId) => {
+    // Ensure savedConfigurations exists
+    if (!Array.isArray(data.savedConfigurations)) {
+      return;
+    }
+    
     const updatedConfigs = data.savedConfigurations.filter(
       config => config.id !== configId
     );
@@ -523,7 +562,7 @@ function App() {
   // Reset to initial data
   const handleResetData = () => {
     // Preserve saved configurations
-    const savedConfigs = [...data.savedConfigurations];
+    const savedConfigs = Array.isArray(data.savedConfigurations) ? [...data.savedConfigurations] : [];
     setData({
       ...initialData,
       savedConfigurations: savedConfigs
@@ -593,6 +632,9 @@ function App() {
       severity: 'success'
     });
   };
+
+  // Ensure savedConfigurations is always an array
+  const savedConfigurations = Array.isArray(data.savedConfigurations) ? data.savedConfigurations : [];
 
   return (
     <ThemeProvider theme={theme}>
@@ -803,9 +845,9 @@ function App() {
         >
           <DialogTitle>Load Saved Configuration</DialogTitle>
           <DialogContent>
-            {data.savedConfigurations.length > 0 ? (
+            {savedConfigurations.length > 0 ? (
               <Box sx={{ mt: 2 }}>
-                {data.savedConfigurations.map((config) => (
+                {savedConfigurations.map((config) => (
                   <Box 
                     key={config.id}
                     sx={{
@@ -855,7 +897,7 @@ function App() {
             <Button 
               onClick={handleLoadConfiguration} 
               variant="contained"
-              disabled={!loadDialog.selectedConfig || data.savedConfigurations.length === 0}
+              disabled={!loadDialog.selectedConfig || savedConfigurations.length === 0}
             >
               Load
             </Button>
