@@ -121,7 +121,7 @@ const RightPanel = ({ personnel, className, onAddPersonnel, onDeletePersonnel })
         }}
       />
       
-      <Droppable droppableId="personnel-list" isDropDisabled={true}>
+      <Droppable droppableId="personnel-list" isDropDisabled={true} type="PERSONNEL">
         {(provided, snapshot) => (
           <List
             {...provided.droppableProps}
@@ -134,7 +134,7 @@ const RightPanel = ({ personnel, className, onAddPersonnel, onDeletePersonnel })
             }}
           >
             {filteredPersonnel.map((person, index) => (
-              <Draggable key={person.id} draggableId={person.id} index={index}>
+              <Draggable key={person.id} draggableId={person.id} index={index} type="PERSONNEL">
                 {(provided, snapshot) => (
                   <React.Fragment>
                     <ListItem

@@ -1,5 +1,5 @@
 import React from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext } from 'react-beautiful-dnd';
 import { Box, Typography, Paper } from '@mui/material';
 
 // Enhanced drag-and-drop helper component for visual feedback
@@ -76,7 +76,16 @@ const EnhancedDragDropProvider = ({ children, onDragEnd }) => {
   });
 
   const handleDragStart = (start) => {
-    const type = start.source.droppableId.includes('roles') ? 'role' : 'personnel';
+    // Determine the type based on the droppable ID or the type property
+    let type = 'default';
+    if (start.type === 'PERSONNEL') {
+      type = 'personnel';
+    } else if (start.source.droppableId.includes('roles')) {
+      type = 'role';
+    } else if (start.source.droppableId.includes('personnel')) {
+      type = 'personnel';
+    }
+    
     setDragState({
       isDragging: true,
       item: start.draggableId,
