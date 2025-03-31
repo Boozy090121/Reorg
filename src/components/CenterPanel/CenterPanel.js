@@ -1,190 +1,120 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState } from 'react';
+import { Droppable } from 'react-beautiful-dnd';
 import { 
-  Box, 
+  Paper, 
   Typography, 
-  Paper,
+  Box, 
+  Button, 
+  Slider, 
   IconButton,
-  ButtonGroup,
-  Button,
   Tooltip
 } from '@mui/material';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import FitScreenIcon from '@mui/icons-material/FitScreen';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import OrgChartNode from './OrgChartNode';
-import OrgChartConnection from './OrgChartConnection';
-import DroppableOrgChart from '../DragDrop/DroppableOrgChart';
+import OrgNode from './OrgNode';
 
-const CenterPanel = ({ phase, factory }) => {
-  const dispatch = useDispatch();
-  const orgChart = useSelector(state => 
-    state.orgChart.orgCharts[phase]?.[factory] || { nodes: [], connections: [] }
-  );
+const CenterPanel = ({ orgChart, roles, personnel, assignments, className }) => {
+  const [zoom, setZoom] = useState(100);
   
-  const [zoom, setZoom] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [selectedNode, setSelectedNode] = useState(null);
-  
-  // Handle zoom in
-  const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 0.1, 2));
-  };
-  
-  // Handle zoom out
-  const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 0.1, 0.5));
-  };
-  
-  // Handle reset view
-  const handleReset = () => {
-    setZoom(1);
-    setPosition({ x: 0, y: 0 });
-  };
-  
-  // Handle fit to screen
-  const handleFit = () => {
-    // This would be implemented with actual chart dimensions
-    setZoom(0.8);
-    setPosition({ x: 0, y: 0 });
-  };
-  
-  // Handle mouse down for panning
-  const handleMouseDown = (e) => {
-    if (e.target.closest('.org-chart-node')) {
-      // Don't start panning if clicking on a node
-      return;
+  // Group nodes by level for hierarchical display
+  const nodesByLevel = {};
+  orgChart.nodes.forEach(node => {
+    if (!nodesByLevel[node.level]) {
+      nodesByLevel[node.level] = [];
     }
-    
-    setDragging(true);
-    setDragStart({ x: e.clientX, y: e.clientY });
+    nodesByLevel[node.level].push(node);
+  });
+  
+  const handleZoomChange = (event, newValue) => {
+    setZoom(newValue);
   };
   
-  // Handle mouse move for panning
-  const handleMouseMove = (e) => {
-    if (!dragging) return;
-    
-    const dx = e.clientX - dragStart.x;
-    const dy = e.clientY - dragStart.y;
-    
-    setPosition(prev => ({
-      x: prev.x + dx,
-      y: prev.y + dy
-    }));
-    
-    setDragStart({ x: e.clientX, y: e.clientY });
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev + 10, 200));
   };
   
-  // Handle mouse up to stop panning
-  const handleMouseUp = () => {
-    setDragging(false);
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(prev - 10, 50));
   };
   
-  // Handle node selection
-  const handleNodeSelect = (nodeId) => {
-    setSelectedNode(nodeId === selectedNode ? null : nodeId);
+  const handleFitToScreen = () => {
+    setZoom(100);
   };
-  
-  // Add event listeners for mouse up and mouse leave
-  useEffect(() => {
-    const handleGlobalMouseUp = () => {
-      setDragging(false);
-    };
-    
-    window.addEventListener('mouseup', handleGlobalMouseUp);
-    
-    return () => {
-      window.removeEventListener('mouseup', handleGlobalMouseUp);
-    };
-  }, []);
   
   return (
-    <Paper 
-      sx={{ 
-        height: '100%', 
-        overflow: 'hidden', 
-        p: 2, 
-        display: 'flex', 
-        flexDirection: 'column',
-        cursor: dragging ? 'grabbing' : 'default'
-      }}
-    >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6">
-          Organization Chart
-        </Typography>
-        
-        <ButtonGroup size="small">
-          <Tooltip title="Zoom In">
-            <IconButton onClick={handleZoomIn}>
-              <ZoomInIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Zoom Out">
-            <IconButton onClick={handleZoomOut}>
-              <ZoomOutIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Reset View">
-            <IconButton onClick={handleReset}>
-              <RestartAltIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Fit to Screen">
-            <IconButton onClick={handleFit}>
-              <FitScreenIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </ButtonGroup>
-      </Box>
+    <div className={className}>
+      <Typography variant="h6" className="panel-title">
+        Organization Chart
+      </Typography>
       
-      <Box 
-        sx={{ 
-          flexGrow: 1, 
-          position: 'relative', 
-          overflow: 'hidden',
-          border: '1px solid #eee',
-          borderRadius: 1,
-          backgroundColor: '#fafafa'
-        }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-      >
-        {orgChart.nodes.length > 0 ? (
-          <DroppableOrgChart 
-            phase={phase} 
-            factory={factory} 
-            zoom={zoom} 
-            position={position} 
-            dragging={dragging} 
-            selectedNode={selectedNode} 
-            onNodeSelect={handleNodeSelect}
+      <div className="org-chart-wrapper">
+        <div 
+          className="org-chart-content"
+          style={{ 
+            transform: `scale(${zoom / 100})`,
+            minHeight: Object.keys(nodesByLevel).length * 150 + 'px'
+          }}
+        >
+          {Object.keys(nodesByLevel).sort((a, b) => a - b).map(level => (
+            <div key={level} className="org-level">
+              {nodesByLevel[level].map(node => (
+                <OrgNode 
+                  key={node.id} 
+                  node={node} 
+                  roles={roles} 
+                  personnel={personnel}
+                  assignments={assignments}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+        
+        <div className="zoom-controls">
+          <Tooltip title="Zoom Out">
+            <IconButton onClick={handleZoomOut} size="small">
+              <ZoomOutIcon />
+            </IconButton>
+          </Tooltip>
+          
+          <Slider
+            value={zoom}
+            onChange={handleZoomChange}
+            min={50}
+            max={200}
+            step={5}
+            sx={{ width: 100, mx: 1 }}
+            aria-label="Zoom"
           />
-        ) : (
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
-              alignItems: 'center', 
-              height: '100%',
-              flexDirection: 'column',
-              gap: 2
-            }}
-          >
-            <Typography color="text.secondary">
-              No organization chart data available
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Drag roles from the left panel to build your organization chart
-            </Typography>
-          </Box>
-        )}
-      </Box>
-    </Paper>
+          
+          <Tooltip title="Zoom In">
+            <IconButton onClick={handleZoomIn} size="small">
+              <ZoomInIcon />
+            </IconButton>
+          </Tooltip>
+          
+          <Tooltip title="Fit to Screen">
+            <IconButton onClick={handleFitToScreen} size="small" sx={{ ml: 1 }}>
+              <FitScreenIcon />
+            </IconButton>
+          </Tooltip>
+        </div>
+      </div>
+      
+      {Object.keys(nodesByLevel).length === 0 && (
+        <Box 
+          display="flex" 
+          justifyContent="center" 
+          alignItems="center" 
+          height="50vh"
+        >
+          <Typography variant="body1" color="text.secondary">
+            No organization chart nodes available
+          </Typography>
+        </Box>
+      )}
+    </div>
   );
 };
 

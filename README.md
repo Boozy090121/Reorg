@@ -1,97 +1,99 @@
-# Netlify Deployment README
+# Quality Re-organization Tool Documentation
 
-This folder contains a Netlify-ready version of the Quality Re-organization Tool. This README provides instructions for deploying the application to Netlify.
+## Overview
+The Quality Re-organization Tool is an interactive, data-driven application for optimizing quality operations through re-organization and focus factory management. It supports a multi-phase approach (current state and future state) and provides a unified interface for managing roles, organizational structure, and personnel assignments.
 
-## Quick Deployment
+## Features
+- **Phase Management**: Switch between current and future state views
+- **Three-Panel Interface**:
+  - Left Panel: List of roles with detailed responsibilities
+  - Center Panel: Interactive org chart with drag-and-drop functionality
+  - Right Panel: Available personnel for role assignment
+- **Drag-and-Drop Functionality**: Easily drag roles to the org chart and assign personnel
+- **Focus Factory Management**: Templates for ADD, BBV, and SYN factories
+- **Data Persistence**: Save configurations locally with export/import functionality
+- **Optimized Org Chart**: Zoom, pan, and fullscreen controls for better visualization
 
-For the simplest deployment experience:
+## Getting Started
 
-1. Log in to your Netlify account
-2. Go to the "Sites" section
-3. Drag and drop this entire folder onto the Netlify dashboard
-4. Wait for the deployment to complete
-5. Access your site at the provided Netlify URL
-
-That's it! Netlify will automatically detect the configuration and build the application for you.
-
-## Manual Deployment Steps
-
-If you prefer to use the Netlify CLI or want more control over the deployment process:
-
-### Using Netlify CLI
-
-1. Install the Netlify CLI if you haven't already:
+### Installation
+1. Ensure you have Node.js installed (v14 or higher)
+2. Clone or download the repository
+3. Navigate to the project directory
+4. Install dependencies:
    ```
-   npm install -g netlify-cli
+   npm install
    ```
-
-2. Log in to your Netlify account:
+5. Start the application:
    ```
-   netlify login
-   ```
-
-3. Navigate to this folder and initialize a new Netlify site:
-   ```
-   cd path/to/this/folder
-   netlify init
+   npm start
    ```
 
-4. Follow the prompts to create a new site or connect to an existing one
+### Usage Guide
 
-5. Deploy the site:
-   ```
-   netlify deploy --prod
-   ```
+#### Phase Management
+- Use the tabs at the top of the application to switch between "Current State" and "Future State"
+- Changes made in one phase do not affect the other phase
 
-### Using Netlify UI with Git
+#### Focus Factory Selection
+- Select the desired focus factory (ADD, BBV, or SYN) using the tabs below the phase selection
+- Each factory has its own organization structure and assignments
 
-1. Push this folder to a Git repository (GitHub, GitLab, or Bitbucket)
+#### Working with Roles
+- The left panel displays available roles with their responsibilities
+- Click on a role to view detailed responsibilities
+- Drag roles from the left panel to nodes in the org chart
 
-2. Log in to your Netlify account
+#### Working with the Org Chart
+- The center panel displays the organization chart
+- Use zoom controls to adjust the view:
+  - Zoom in/out buttons
+  - Zoom slider
+  - "Fit to Screen" button
+- Enable pan mode to move the chart around
+- Use fullscreen mode for a larger view
+- Drag roles between nodes to reorganize
 
-3. Click "New site from Git"
+#### Assigning Personnel
+- The right panel displays available personnel with their skills
+- Use the search box to filter personnel by name or skill
+- Drag personnel from the right panel to roles in the org chart
 
-4. Select your Git provider and repository
+#### Saving and Loading Data
+- Data is automatically saved to your browser's local storage
+- Use the "Export" button to save your configuration as a JSON file
+- Use the "Import" button to load a previously exported configuration
 
-5. Configure build settings:
-   - Build command: `npm run build`
-   - Publish directory: `build`
+## Technical Details
 
-6. Click "Deploy site"
+### Architecture
+The application is built using React with a component-based architecture:
+- App.js: Main application component with state management
+- LeftPanel: Manages roles display and drag sources
+- CenterPanel: Displays the org chart with drag targets
+- RightPanel: Manages personnel display and drag sources
+- OrgChartOptimizer: Handles screen fit optimization
+- FocusFactoryTemplates: Manages factory templates
+- DataPersistenceUtils: Handles data saving and loading
 
-## Configuration
+### Data Model
+- Roles: Contains role information and responsibilities
+- Personnel: Contains personnel information and skills
+- OrgChart: Contains the organization structure for each phase and factory
+- Assignments: Maps roles to assigned personnel
 
-The deployment is pre-configured with:
-
-- `netlify.toml` - Contains build settings and redirect rules
-- Optimized package.json with all required dependencies
-- Proper public folder structure
-
-## Custom Domain
-
-To use a custom domain with your deployed application:
-
-1. Go to your site settings in Netlify
-2. Navigate to "Domain management"
-3. Click "Add custom domain"
-4. Follow the instructions to set up your domain
-
-## Environment Variables
-
-If you need to add environment variables:
-
-1. Go to your site settings in Netlify
-2. Navigate to "Build & deploy" > "Environment"
-3. Click "Edit variables"
-4. Add your environment variables
+### Libraries Used
+- React: UI framework
+- Material UI: Component library
+- react-beautiful-dnd: Drag-and-drop functionality
+- localStorage API: Data persistence
 
 ## Troubleshooting
 
-If you encounter any issues during deployment:
+### Common Issues
+- **Drag and drop not working**: Ensure you're dragging from the correct source to the correct target
+- **Changes not saving**: Check if localStorage is enabled in your browser
+- **Org chart display issues**: Try using the "Fit to Screen" button or adjust zoom level
 
-1. Check the Netlify build logs for errors
-2. Ensure all dependencies are correctly listed in package.json
-3. Verify that the netlify.toml file is in the root directory
-4. Make sure the public folder contains all necessary assets
-
-For more help, refer to the Netlify documentation at https://docs.netlify.com/
+### Support
+For additional support or to report issues, please contact the development team.

@@ -1,179 +1,49 @@
-import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React from 'react';
+import { Droppable, Draggable } from 'react-beautiful-dnd';
 import { 
-  Box, 
-  Typography, 
   Paper, 
-  TextField, 
+  Typography, 
   List, 
   ListItem, 
   ListItemText, 
-  ListItemIcon,
-  ListItemSecondaryAction,
-  Divider, 
-  Collapse,
-  IconButton,
+  ListItemAvatar,
+  Avatar,
+  Divider,
   Chip,
-  Button,
-  Tooltip,
-  Avatar
+  Box,
+  TextField,
+  InputAdornment
 } from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
 import SearchIcon from '@mui/icons-material/Search';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import AddIcon from '@mui/icons-material/Add';
-import InputAdornment from '@mui/material/InputAdornment';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import PersonnelDetails from './PersonnelDetails';
-import PersonnelCreator from './PersonnelCreator';
 
-const PersonnelItem = ({ person, index, onDragStart }) => {
-  const [expanded, setExpanded] = useState(false);
-
-  const handleToggleExpand = (e) => {
-    // Prevent expansion when starting drag
-    if (e.target.closest('.drag-handle')) {
-      return;
-    }
-    setExpanded(!expanded);
-  };
-
-  // Function to determine chip color based on availability
-  const getAvailabilityColor = (availability) => {
-    switch(availability) {
-      case 'Available':
-        return 'success';
-      case 'Partially Available':
-        return 'warning';
-      case 'Assigned':
-        return 'error';
-      default:
-        return 'default';
-    }
-  };
-
-  return (
-    <>
-      <Draggable draggableId={person.id} index={index}>
-        {(provided, snapshot) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            style={{
-              ...provided.draggableProps.style,
-              opacity: snapshot.isDragging ? 0.6 : 1
-            }}
-          >
-            <ListItem 
-              button 
-              onClick={handleToggleExpand}
-              sx={{ 
-                border: '1px solid #eee', 
-                borderRadius: 1, 
-                mb: 1,
-                '&:hover': {
-                  backgroundColor: '#f5f5f5',
-                },
-                backgroundColor: snapshot.isDragging ? '#e3f2fd' : 'inherit'
-              }}
-            >
-              <ListItemIcon className="drag-handle" {...provided.dragHandleProps}>
-                <DragIndicatorIcon />
-              </ListItemIcon>
-              <ListItemText 
-                primary={
-                  <Typography variant="subtitle1" fontWeight="medium">
-                    {person.name}
-                  </Typography>
-                } 
-                secondary={`Current: ${person.currentRole}`} 
-              />
-              <ListItemSecondaryAction>
-                <Chip 
-                  label={person.availability} 
-                  size="small" 
-                  color={getAvailabilityColor(person.availability)} 
-                />
-              </ListItemSecondaryAction>
-            </ListItem>
-          </div>
-        )}
-      </Draggable>
-      
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <PersonnelDetails person={person} />
-      </Collapse>
-    </>
-  );
-};
-
-const RightPanel = ({ phase, factory }) => {
-  const personnel = useSelector(state => state.personnel.personnel[factory] || []);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [availabilityFilter, setAvailabilityFilter] = useState('All');
-  const [openPersonnelCreator, setOpenPersonnelCreator] = useState(false);
-  
-  // Get unique availability statuses for filtering
-  const availabilityOptions = ['All', ...new Set(personnel.map(person => person.availability))];
-  
-  // Filter personnel based on search term and availability
-  const filteredPersonnel = personnel.filter(person => {
-    const matchesSearch = person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         person.currentRole.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         person.skills.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesAvailability = availabilityFilter === 'All' || person.availability === availabilityFilter;
-    
-    return matchesSearch && matchesAvailability;
-  });
+const RightPanel = ({ personnel, className }) => {
+  const [searchTerm, setSearchTerm] = React.useState('');
   
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
   
-  const handleAvailabilityChange = (availability) => {
-    setAvailabilityFilter(availability);
-  };
-  
-  const handleOpenPersonnelCreator = () => {
-    setOpenPersonnelCreator(true);
-  };
-  
-  const handleClosePersonnelCreator = () => {
-    setOpenPersonnelCreator(false);
-  };
-  
-  const handleDragStart = (result) => {
-    // This would be implemented in step 009 (drag-and-drop functionality)
-    console.log('Drag started:', result);
-  };
-  
+  // Filter personnel based on search term
+  const filteredPersonnel = Object.values(personnel).filter(person => 
+    person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    person.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
   return (
-    <Paper sx={{ height: '100%', overflow: 'auto', p: 2, display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-        <Typography variant="h6">
-          Personnel List
-        </Typography>
-        <Tooltip title="Add new personnel">
-          <IconButton 
-            color="primary" 
-            size="small"
-            onClick={handleOpenPersonnelCreator}
-          >
-            <AddIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
+    <div className={className}>
+      <Typography variant="h6" className="panel-title">
+        Available Personnel
+      </Typography>
       
       <TextField
         fullWidth
-        placeholder="Search Personnel..."
-        margin="normal"
         variant="outlined"
         size="small"
+        placeholder="Search by name or skill"
         value={searchTerm}
         onChange={handleSearchChange}
+        sx={{ mb: 2 }}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -183,65 +53,84 @@ const RightPanel = ({ phase, factory }) => {
         }}
       />
       
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, my: 1 }}>
-        {availabilityOptions.map((availability) => (
-          <Chip 
-            key={availability}
-            label={availability}
-            onClick={() => handleAvailabilityChange(availability)}
-            color={availabilityFilter === availability ? 'primary' : 'default'}
-            variant={availabilityFilter === availability ? 'filled' : 'outlined'}
-            size="small"
-          />
-        ))}
-      </Box>
-      
-      <Divider sx={{ my: 1 }} />
-      
-      <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-        <DragDropContext onDragStart={handleDragStart}>
-          <Droppable droppableId="personnelList" isDropDisabled={true}>
-            {(provided) => (
-              <List 
-                sx={{ mt: 1 }}
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-              >
-                {filteredPersonnel.length > 0 ? (
-                  filteredPersonnel.map((person, index) => (
-                    <PersonnelItem 
-                      key={person.id} 
-                      person={person} 
-                      index={index} 
-                      onDragStart={handleDragStart}
-                    />
-                  ))
-                ) : (
-                  <Box sx={{ textAlign: 'center', py: 3 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      No personnel match your search criteria
-                    </Typography>
-                  </Box>
+      <Droppable droppableId="personnel-list" isDropDisabled={true}>
+        {(provided, snapshot) => (
+          <List
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+            component={Paper}
+            elevation={1}
+            sx={{ 
+              bgcolor: snapshot.isDraggingOver ? 'rgba(25, 118, 210, 0.08)' : 'background.paper',
+              minHeight: '100px'
+            }}
+          >
+            {filteredPersonnel.map((person, index) => (
+              <Draggable key={person.id} draggableId={person.id} index={index}>
+                {(provided, snapshot) => (
+                  <React.Fragment>
+                    <ListItem
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      className={`draggable-item ${snapshot.isDragging ? 'dragging' : ''}`}
+                      sx={{
+                        mb: 1,
+                        borderRadius: 1,
+                        bgcolor: snapshot.isDragging ? 'rgba(25, 118, 210, 0.12)' : 'white',
+                        '&:hover': {
+                          bgcolor: 'rgba(25, 118, 210, 0.04)',
+                        },
+                      }}
+                    >
+                      <ListItemAvatar>
+                        <Avatar>
+                          <PersonIcon />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={person.name}
+                        secondary={
+                          <Box sx={{ mt: 0.5 }}>
+                            {person.skills.map((skill, idx) => (
+                              <Chip
+                                key={idx}
+                                label={skill}
+                                size="small"
+                                sx={{ 
+                                  mr: 0.5, 
+                                  mb: 0.5,
+                                  fontSize: '0.7rem',
+                                  height: '20px'
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        }
+                      />
+                    </ListItem>
+                    {index < filteredPersonnel.length - 1 && <Divider variant="inset" component="li" />}
+                  </React.Fragment>
                 )}
-                {provided.placeholder}
-              </List>
+              </Draggable>
+            ))}
+            {provided.placeholder}
+            
+            {filteredPersonnel.length === 0 && (
+              <ListItem sx={{ justifyContent: 'center', py: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  {searchTerm ? 'No matching personnel found' : 'No personnel available'}
+                </Typography>
+              </ListItem>
             )}
-          </Droppable>
-        </DragDropContext>
-      </Box>
+          </List>
+        )}
+      </Droppable>
       
-      <Box sx={{ mt: 2, textAlign: 'center' }}>
-        <Typography variant="body2" color="text.secondary">
-          Drag personnel to roles in the org chart to assign
-        </Typography>
-      </Box>
-      
-      <PersonnelCreator 
-        factory={factory} 
-        open={openPersonnelCreator} 
-        onClose={handleClosePersonnelCreator} 
-      />
-    </Paper>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 2, fontStyle: 'italic' }}>
+        Drag personnel to roles in the organization chart to assign them.
+      </Typography>
+    </div>
   );
 };
 

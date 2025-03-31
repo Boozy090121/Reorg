@@ -1,32 +1,32 @@
 {
   "name": "quality-reorg-tool",
   "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "@emotion/react": "^11.11.0",
-    "@emotion/styled": "^11.11.0",
-    "@mui/icons-material": "^5.11.16",
-    "@mui/material": "^5.13.0",
-    "@reduxjs/toolkit": "^1.9.5",
-    "react": "^18.2.0",
-    "react-beautiful-dnd": "^13.1.1",
-    "react-dom": "^18.2.0",
-    "react-orgchart": "^1.0.5",
-    "react-redux": "^8.0.5",
-    "react-scripts": "5.0.1",
-    "redux": "^4.2.1"
-  },
+  "description": "Quality Re-organization Tool for optimizing quality operations through re-organization and focus factory management",
+  "main": "index.js",
   "scripts": {
     "start": "react-scripts start",
-    "build": "CI=false react-scripts build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "keywords": [
+    "quality",
+    "organization",
+    "management",
+    "focus-factory"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^7.0.1",
+    "@mui/material": "^7.0.1",
+    "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-dom": "^18.2.0",
+    "react-scripts": "^5.0.1",
+    "web-vitals": "^3.4.0"
   },
   "browserslist": {
     "production": [
