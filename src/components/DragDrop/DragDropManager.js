@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { DragDropContext } from 'react-beautiful-dnd';
-import { addNode, updateNode, assignPersonToNode } from '../features/orgChartSlice';
-import { updatePersonnelAvailability } from '../features/personnelSlice';
+import { addNode, updateNode, assignPersonToNode } from '../../features/orgChartSlice';
+import { updatePersonnelAvailability } from '../../features/personnelSlice';
 
 const DragDropManager = ({ children }) => {
   const dispatch = useDispatch();
