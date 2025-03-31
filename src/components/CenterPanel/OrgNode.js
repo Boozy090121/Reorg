@@ -1,5 +1,5 @@
 import React from 'react';
-import { Droppable, Draggable } from 'react-beautiful-dnd';
+import { Droppable, Draggable } from '../utils/DragDropUtils';
 import { 
   Paper, 
   Typography, 
@@ -87,7 +87,7 @@ const OrgNode = ({ node, roles, personnel, assignments, onRemoveNode }) => {
       
       <Divider sx={{ mb: 1 }} />
       
-      <Droppable droppableId={`org-node-${node.id}`}>
+      <Droppable droppableId={`org-node-${node.id}`} type="ROLE">
         {(provided, snapshot) => (
           <Box
             {...provided.droppableProps}

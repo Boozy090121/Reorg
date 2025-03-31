@@ -1,5 +1,5 @@
 import React from 'react';
-import { Droppable, Draggable } from 'react-beautiful-dnd';
+import { Droppable, Draggable } from '../utils/DragDropUtils';
 import { 
   Paper, 
   Typography, 
@@ -134,7 +134,7 @@ const RightPanel = ({ personnel, className, onAddPersonnel, onDeletePersonnel })
             }}
           >
             {filteredPersonnel.map((person, index) => (
-              <Draggable key={person.id} draggableId={person.id} index={index} type="PERSONNEL">
+              <Draggable key={person.id} draggableId={person.id} index={index}>
                 {(provided, snapshot) => (
                   <React.Fragment>
                     <ListItem

@@ -1,6 +1,25 @@
 import React from 'react';
-import { DragDropContext } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable as ReactBeautifulDndDroppable, Draggable as ReactBeautifulDndDraggable } from 'react-beautiful-dnd';
 import { Box, Typography, Paper } from '@mui/material';
+
+// Create custom wrapper components that handle the type prop correctly
+const Droppable = ({ children, type, ...props }) => {
+  // Pass the type prop correctly to the underlying component
+  return (
+    <ReactBeautifulDndDroppable {...props} type={type}>
+      {children}
+    </ReactBeautifulDndDroppable>
+  );
+};
+
+const Draggable = ({ children, ...props }) => {
+  // The type is handled at the Droppable level, not needed here
+  return (
+    <ReactBeautifulDndDraggable {...props}>
+      {children}
+    </ReactBeautifulDndDraggable>
+  );
+};
 
 // Enhanced drag-and-drop helper component for visual feedback
 const DragDropHelper = () => {
@@ -91,6 +110,8 @@ const EnhancedDragDropProvider = ({ children, onDragEnd }) => {
       item: start.draggableId,
       type
     });
+    
+    console.log('Drag started:', start);
   };
 
   const handleDragEnd = (result) => {
@@ -99,6 +120,8 @@ const EnhancedDragDropProvider = ({ children, onDragEnd }) => {
       item: null,
       type: null
     });
+    
+    console.log('Drag ended:', result);
     
     // Call the provided onDragEnd handler
     onDragEnd(result);
@@ -118,4 +141,4 @@ const EnhancedDragDropProvider = ({ children, onDragEnd }) => {
   );
 };
 
-export { EnhancedDragDropProvider };
+export { EnhancedDragDropProvider, Droppable, Draggable };
