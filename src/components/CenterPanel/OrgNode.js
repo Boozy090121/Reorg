@@ -1,5 +1,5 @@
 import React from 'react';
-import { Droppable, Draggable } from '../utils/DragDropUtils';
+import { Droppable, Draggable } from '../../utils/DragDropUtils';
 import { 
   Paper, 
   Typography, 
