@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 // Helper function to load state from localStorage
+// eslint-disable-next-line no-unused-vars
 const loadFromLocalStorage = (key, defaultValue) => {
   try {
     const serializedState = localStorage.getItem(key);
