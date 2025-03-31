@@ -15,6 +15,8 @@ import { setCurrentFactory } from '../../features/focusFactorySlice';
 const FocusFactorySelector = () => {
   const dispatch = useDispatch();
   const { currentFactory, factories } = useSelector(state => state.focusFactory);
+  // Convert factories object keys to array for mapping
+  const factoryKeys = factories ? Object.keys(factories) : ['ADD', 'BBV', 'SYN'];
   
   const handleFactoryChange = (event, newFactory) => {
     if (newFactory !== null) {
@@ -45,7 +47,7 @@ const FocusFactorySelector = () => {
         variant="fullWidth"
         aria-label="focus factory tabs"
       >
-        {factories.map(factory => (
+        {factoryKeys.map(factory => (
           <Tab 
             key={factory} 
             label={factory} 
