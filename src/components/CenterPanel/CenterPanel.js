@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Droppable } from 'react-beautiful-dnd';
 import { 
   Paper, 
@@ -13,9 +13,11 @@ import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import FitScreenIcon from '@mui/icons-material/FitScreen';
 import OrgNode from './OrgNode';
+import OrgChartOptimizer from './OrgChartOptimizer';
 
-const CenterPanel = ({ orgChart, roles, personnel, assignments, className }) => {
+const CenterPanel = ({ orgChart, roles, personnel, assignments, className, onUpdateOrgChart }) => {
   const [zoom, setZoom] = useState(100);
+  const containerRef = useRef(null);
   
   // Group nodes by level for hierarchical display
   const nodesByLevel = {};
@@ -41,66 +43,88 @@ const CenterPanel = ({ orgChart, roles, personnel, assignments, className }) => 
   const handleFitToScreen = () => {
     setZoom(100);
   };
+
+  // Function to add a new node to the org chart
+  const handleAddNode = (level) => {
+    const newNodeId = `node-${Date.now()}`;
+    const newNode = {
+      id: newNodeId,
+      level,
+      roles: []
+    };
+    
+    const updatedNodes = [...orgChart.nodes, newNode];
+    onUpdateOrgChart({
+      ...orgChart,
+      nodes: updatedNodes
+    });
+  };
+
+  // Function to remove a node from the org chart
+  const handleRemoveNode = (nodeId) => {
+    const updatedNodes = orgChart.nodes.filter(node => node.id !== nodeId);
+    onUpdateOrgChart({
+      ...orgChart,
+      nodes: updatedNodes
+    });
+  };
   
   return (
-    <div className={className}>
+    <div className={className} ref={containerRef}>
       <Typography variant="h6" className="panel-title">
         Organization Chart
       </Typography>
       
-      <div className="org-chart-wrapper">
-        <div 
-          className="org-chart-content"
-          style={{ 
-            transform: `scale(${zoom / 100})`,
-            minHeight: Object.keys(nodesByLevel).length * 150 + 'px'
-          }}
-        >
+      <OrgChartOptimizer containerRef={containerRef}>
+        <Box sx={{ padding: 2 }}>
           {Object.keys(nodesByLevel).sort((a, b) => a - b).map(level => (
-            <div key={level} className="org-level">
-              {nodesByLevel[level].map(node => (
-                <OrgNode 
-                  key={node.id} 
-                  node={node} 
-                  roles={roles} 
-                  personnel={personnel}
-                  assignments={assignments}
-                />
-              ))}
-            </div>
+            <Box key={level}>
+              <Box 
+                display="flex" 
+                justifyContent="space-between" 
+                alignItems="center"
+                mb={1}
+              >
+                <Typography variant="subtitle1">Level {parseInt(level) + 1}</Typography>
+                <Button 
+                  variant="outlined" 
+                  size="small"
+                  onClick={() => handleAddNode(parseInt(level))}
+                >
+                  Add Node to Level {parseInt(level) + 1}
+                </Button>
+              </Box>
+              
+              <div className="org-level">
+                {nodesByLevel[level].map(node => (
+                  <OrgNode 
+                    key={node.id} 
+                    node={node} 
+                    roles={roles} 
+                    personnel={personnel}
+                    assignments={assignments}
+                    onRemoveNode={handleRemoveNode}
+                  />
+                ))}
+              </div>
+            </Box>
           ))}
-        </div>
-        
-        <div className="zoom-controls">
-          <Tooltip title="Zoom Out">
-            <IconButton onClick={handleZoomOut} size="small">
-              <ZoomOutIcon />
-            </IconButton>
-          </Tooltip>
           
-          <Slider
-            value={zoom}
-            onChange={handleZoomChange}
-            min={50}
-            max={200}
-            step={5}
-            sx={{ width: 100, mx: 1 }}
-            aria-label="Zoom"
-          />
-          
-          <Tooltip title="Zoom In">
-            <IconButton onClick={handleZoomIn} size="small">
-              <ZoomInIcon />
-            </IconButton>
-          </Tooltip>
-          
-          <Tooltip title="Fit to Screen">
-            <IconButton onClick={handleFitToScreen} size="small" sx={{ ml: 1 }}>
-              <FitScreenIcon />
-            </IconButton>
-          </Tooltip>
-        </div>
-      </div>
+          {/* Add new level button */}
+          <Box 
+            display="flex" 
+            justifyContent="center" 
+            mt={3}
+          >
+            <Button 
+              variant="contained" 
+              onClick={() => handleAddNode(Object.keys(nodesByLevel).length)}
+            >
+              Add New Level
+            </Button>
+          </Box>
+        </Box>
+      </OrgChartOptimizer>
       
       {Object.keys(nodesByLevel).length === 0 && (
         <Box 
@@ -109,9 +133,12 @@ const CenterPanel = ({ orgChart, roles, personnel, assignments, className }) => 
           alignItems="center" 
           height="50vh"
         >
-          <Typography variant="body1" color="text.secondary">
-            No organization chart nodes available
-          </Typography>
+          <Button 
+            variant="contained"
+            onClick={() => handleAddNode(0)}
+          >
+            Create First Node
+          </Button>
         </Box>
       )}
     </div>

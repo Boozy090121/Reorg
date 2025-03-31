@@ -6,13 +6,44 @@ import {
   Box, 
   Chip,
   Avatar,
-  Divider
+  Divider,
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
 
-const OrgNode = ({ node, roles, personnel, assignments }) => {
+const OrgNode = ({ node, roles, personnel, assignments, onRemoveNode }) => {
   // Get assigned roles for this node
   const nodeRoles = node.roles || [];
+  
+  // Function to remove a role from the node
+  const handleRemoveRole = (roleId, event) => {
+    event.stopPropagation(); // Prevent triggering drag events
+    
+    // Create a copy of the node with the role removed
+    const updatedRoles = node.roles.filter(id => id !== roleId);
+    
+    // Update the node in the parent component
+    const updatedNode = {
+      ...node,
+      roles: updatedRoles
+    };
+    
+    // This would need to be passed up to the parent component
+    // For now, we'll just update the node directly
+    node.roles = updatedRoles;
+  };
+  
+  // Function to remove a personnel assignment
+  const handleRemoveAssignment = (roleId, event) => {
+    event.stopPropagation(); // Prevent triggering drag events
+    
+    // This would need to be passed up to the parent component
+    // For now, we'll just log it
+    console.log(`Remove assignment for role ${roleId}`);
+  };
   
   return (
     <Paper 
@@ -35,9 +66,24 @@ const OrgNode = ({ node, roles, personnel, assignments }) => {
         }
       }}
     >
-      <Typography variant="subtitle1" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
-        {`Level ${node.level + 1}`}
-      </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+          {`Level ${node.level + 1}`}
+        </Typography>
+        <Tooltip title="Remove Node">
+          <IconButton 
+            size="small" 
+            onClick={() => onRemoveNode(node.id)}
+            sx={{ 
+              '&:hover': { 
+                color: 'error.main' 
+              } 
+            }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
       
       <Divider sx={{ mb: 1 }} />
       
@@ -56,7 +102,7 @@ const OrgNode = ({ node, roles, personnel, assignments }) => {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: nodeRoles.length ? 'flex-start' : 'center',
-              border: snapshot.isDraggingOver ? '1px dashed #1976d2' : '1px dashed transparent',
+              border: snapshot.isDraggingOver ? '1px dashed #1976d2' : '1px dashed #aaa',
             }}
           >
             {nodeRoles.length > 0 ? (
@@ -82,16 +128,32 @@ const OrgNode = ({ node, roles, personnel, assignments }) => {
                           '&:hover': {
                             boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
                           },
+                          position: 'relative',
                         }}
                       >
-                        <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                          {role ? role.title : 'Unknown Role'}
-                        </Typography>
+                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                          <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                            {role ? role.title : 'Unknown Role'}
+                          </Typography>
+                          <IconButton 
+                            size="small" 
+                            onClick={(e) => handleRemoveRole(roleId, e)}
+                            sx={{ 
+                              padding: '2px',
+                              '&:hover': { 
+                                color: 'error.main' 
+                              } 
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
                         
                         {/* Personnel assignment area */}
                         <Droppable
                           droppableId={`role-${roleId}`}
                           isDropDisabled={!!assignedPerson}
+                          type="PERSONNEL"
                         >
                           {(provided, snapshot) => (
                             <Box
@@ -110,13 +172,27 @@ const OrgNode = ({ node, roles, personnel, assignments }) => {
                               }}
                             >
                               {assignedPerson ? (
-                                <Chip
-                                  avatar={<Avatar><PersonIcon /></Avatar>}
-                                  label={assignedPerson.name}
-                                  size="small"
-                                  color="primary"
-                                  variant="outlined"
-                                />
+                                <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
+                                  <Chip
+                                    avatar={<Avatar><PersonIcon /></Avatar>}
+                                    label={assignedPerson.name}
+                                    size="small"
+                                    color="primary"
+                                    variant="outlined"
+                                  />
+                                  <IconButton 
+                                    size="small" 
+                                    onClick={(e) => handleRemoveAssignment(roleId, e)}
+                                    sx={{ 
+                                      padding: '2px',
+                                      '&:hover': { 
+                                        color: 'error.main' 
+                                      } 
+                                    }}
+                                  >
+                                    <CloseIcon fontSize="small" />
+                                  </IconButton>
+                                </Box>
                               ) : (
                                 <Typography variant="caption" color="text.secondary">
                                   Drop personnel here
