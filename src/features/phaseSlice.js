@@ -1,37 +1,27 @@
-import { createSlice } from '@reduxjs/toolkit';
-
+// Phase slice
 const initialState = {
-  currentPhase: 'current', // 'current', 'future', or 'iterative'
-  phases: {
-    current: {
-      name: 'Current State',
-      lastModified: new Date().toISOString(),
-    },
-    future: {
-      name: 'Future State',
-      lastModified: null,
-    },
-    iterative: {
-      name: 'Iterative Phase',
-      lastModified: null,
-    }
-  }
+  currentPhase: 'current', // Default to 'current'
+  phases: ['current', 'future']
 };
 
-export const phaseSlice = createSlice({
-  name: 'phase',
-  initialState,
-  reducers: {
-    setCurrentPhase: (state, action) => {
-      state.currentPhase = action.payload;
-    },
-    updatePhaseLastModified: (state, action) => {
-      const { phase } = action.payload;
-      state.phases[phase].lastModified = new Date().toISOString();
-    },
-  },
+// Action types
+export const SET_CURRENT_PHASE = 'SET_CURRENT_PHASE';
+
+// Action creators
+export const setCurrentPhase = (phase) => ({
+  type: SET_CURRENT_PHASE,
+  payload: phase
 });
 
-export const { setCurrentPhase, updatePhaseLastModified } = phaseSlice.actions;
-
-export default phaseSlice.reducer;
+// Reducer
+export default function phaseReducer(state = initialState, action) {
+  switch (action.type) {
+    case SET_CURRENT_PHASE:
+      return {
+        ...state,
+        currentPhase: action.payload
+      };
+    default:
+      return state;
+  }
+} 

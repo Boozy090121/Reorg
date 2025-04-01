@@ -1,20 +1,23 @@
-import { configureStore } from '@reduxjs/toolkit';
-import phaseReducer from './features/phaseSlice';
+import { createStore, combineReducers } from 'redux';
 import roleReducer from './features/roleSlice';
-import personnelReducer from './features/personnelSlice';
-import orgChartReducer from './features/orgChartSlice';
+import phaseReducer from './features/phaseSlice';
 import focusFactoryReducer from './features/focusFactorySlice';
-import persistenceReducer from './features/persistenceSlice';
+import orgChartReducer from './features/orgChartSlice';
 
-const store = configureStore({
-  reducer: {
-    phase: phaseReducer,
-    roles: roleReducer,
-    personnel: personnelReducer,
-    orgChart: orgChartReducer,
-    focusFactory: focusFactoryReducer,
-    persistence: persistenceReducer,
-  },
+// Combine all reducers
+const rootReducer = combineReducers({
+  roles: roleReducer,
+  phase: phaseReducer,
+  focusFactory: focusFactoryReducer,
+  orgChart: orgChartReducer,
+  // Add other reducers here
 });
 
-export default store;
+// Create and export the store
+const store = createStore(
+  rootReducer,
+  // Enable Redux DevTools if available
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+);
+
+export default store; 
