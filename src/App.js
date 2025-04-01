@@ -56,6 +56,7 @@ import FocusFactorySelector from './components/FocusFactory/FocusFactorySelector
 import RolesAndResponsibilities from './roles-tab';
 import QualityProcessFlow from './process-flow-tab';
 import { EnhancedDragDropProvider } from './utils/DragDropUtils';
+import { addRole, updateRole, removeRole } from './features/roleSlice';
 
 // Logo component
 const PCILogo = ({ size = 'default' }) => {
