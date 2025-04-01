@@ -8,7 +8,7 @@ import ReactFlow, {
   applyEdgeChanges, 
   applyNodeChanges 
 } from 'reactflow';
-import 'reactflow/dist/style.css';
+// CSS is now loaded from CDN in index.html
 import { 
   Box, 
   Paper, 
