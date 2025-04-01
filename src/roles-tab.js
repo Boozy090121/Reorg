@@ -50,7 +50,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import SortIcon from '@mui/icons-material/Sort';
 import GroupIcon from '@mui/icons-material/Group';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { addRole, updateRole, removeRole } from './features/roleSlice';
+import { addRole, updateRole, removeRole } from './roleSlice';
 
 const RolesAndResponsibilities = () => {
   const dispatch = useDispatch();
