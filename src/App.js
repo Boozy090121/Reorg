@@ -53,7 +53,7 @@ import LeftPanel from './components/LeftPanel/LeftPanel';
 import RightPanel from './components/RightPanel/RightPanel';
 import PhaseManager from './components/PhaseManager/PhaseManager';
 import FocusFactorySelector from './components/FocusFactory/FocusFactorySelector';
-import RolesAndResponsibilities from './components/RolesAndResponsibilities';
+import RolesAndResponsibilities from './roles-tab';
 import QualityProcessFlow from './process-flow-tab';
 import { EnhancedDragDropProvider } from './utils/DragDropUtils';
 
