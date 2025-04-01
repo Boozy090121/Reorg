@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Provider, useSelector, useDispatch } from 'react-redux';
+import { Provider } from 'react-redux';
 import { ThemeProvider } from '@mui/material/styles';
 import {
   CssBaseline,
@@ -40,22 +40,22 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadIcon from '@mui/icons-material/Upload';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 // Import custom theme
-import pciTheme from './pci-theme';
-
-// Import store
-import store from './store';
+import pciTheme from './theme/pciTheme';
 
 // Import components
-import ModernOrgChart from './improved-org-chart';
+import ModernOrgChart from './components/ModernOrgChart';
+import FlexibleLayout from './components/FlexibleLayout';
 import LeftPanel from './components/LeftPanel/LeftPanel';
 import RightPanel from './components/RightPanel/RightPanel';
 import PhaseManager from './components/PhaseManager/PhaseManager';
 import FocusFactorySelector from './components/FocusFactory/FocusFactorySelector';
 import RolesAndResponsibilities from './components/RolesAndResponsibilities';
-import QualityProcessFlow from './process-flow-tab';
+import QualityProcessFlow from './components/QualityProcessFlow';
 import { EnhancedDragDropProvider } from './utils/DragDropUtils';
+import store from './store';
 
 // Logo component
 const PCILogo = ({ size = 'default' }) => {
@@ -73,6 +73,7 @@ const PCILogo = ({ size = 'default' }) => {
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      {/* Replace with actual logo */}
       <Box 
         sx={{ 
           bgcolor: '#CC2030',
@@ -102,58 +103,8 @@ const PCILogo = ({ size = 'default' }) => {
   );
 };
 
-// Flexible Layout Component
-const FlexibleLayout = ({ leftPanel, centerPanel, rightPanel }) => {
-  return (
-    <Box 
-      sx={{ 
-        display: 'flex', 
-        flexDirection: { xs: 'column', md: 'row' }, 
-        height: '100%', 
-        overflow: 'hidden' 
-      }}
-    >
-      <Box 
-        sx={{ 
-          width: { xs: '100%', md: '25%' }, 
-          height: { xs: '300px', md: 'auto' },
-          overflowY: 'auto',
-          borderRight: '1px solid',
-          borderColor: 'divider',
-          p: 2
-        }}
-      >
-        {leftPanel}
-      </Box>
-      <Box 
-        sx={{ 
-          flex: 1, 
-          height: { xs: 'calc(100vh - 600px)', md: 'auto' }, 
-          overflow: 'hidden',
-          p: 2
-        }}
-      >
-        {centerPanel}
-      </Box>
-      <Box 
-        sx={{ 
-          width: { xs: '100%', md: '25%' }, 
-          height: { xs: '300px', md: 'auto' },
-          overflowY: 'auto',
-          borderLeft: '1px solid',
-          borderColor: 'divider',
-          p: 2
-        }}
-      >
-        {rightPanel}
-      </Box>
-    </Box>
-  );
-};
-
 // App component
 const App = () => {
-  const dispatch = useDispatch();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [currentTab, setCurrentTab] = useState('organization');
   const [notificationsAnchorEl, setNotificationsAnchorEl] = useState(null);
@@ -200,30 +151,6 @@ const App = () => {
     setUserMenuAnchorEl(null);
   };
   
-  // Get data from Redux store
-  const currentPhase = useSelector(state => state.phase.currentPhase);
-  const currentFactory = useSelector(state => state.focusFactory.currentFactory);
-  const orgChart = useSelector(state => {
-    return state.orgChart.orgCharts[currentPhase][currentFactory] || { nodes: [], connections: [] };
-  });
-  const roles = useSelector(state => state.roles.roles);
-  const personnel = useSelector(state => state.personnel.personnel);
-  const assignments = useSelector(state => {
-    return state.assignments[currentPhase][currentFactory] || {};
-  });
-  
-  // Handle updating org chart
-  const handleUpdateOrgChart = (updatedChart) => {
-    dispatch({
-      type: 'UPDATE_ORG_CHART',
-      payload: {
-        phase: currentPhase,
-        factory: currentFactory,
-        orgChart: updatedChart
-      }
-    });
-  };
-  
   // Render the active tab content
   const renderTabContent = () => {
     switch (currentTab) {
@@ -232,15 +159,7 @@ const App = () => {
           <EnhancedDragDropProvider>
             <FlexibleLayout
               leftPanel={<LeftPanel />}
-              centerPanel={
-                <ModernOrgChart 
-                  orgChart={orgChart}
-                  roles={roles}
-                  personnel={personnel}
-                  assignments={assignments}
-                  onUpdateOrgChart={handleUpdateOrgChart}
-                />
-              }
+              centerPanel={<ModernOrgChart />}
               rightPanel={<RightPanel />}
             />
           </EnhancedDragDropProvider>
@@ -253,7 +172,7 @@ const App = () => {
         return <Box p={3}>Coming Soon</Box>;
     }
   };
-
+  
   return (
     <ThemeProvider theme={pciTheme}>
       <CssBaseline />
@@ -271,7 +190,7 @@ const App = () => {
           <Toolbar>
             <IconButton
               edge="start"
-              color="inherit" 
+              color="inherit"
               aria-label="open drawer"
               onClick={toggleDrawer}
               sx={{ mr: 2 }}
@@ -348,7 +267,7 @@ const App = () => {
             
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <IconButton 
-              color="inherit" 
+                color="inherit" 
                 aria-label="save"
                 size="large"
                 sx={{ display: { xs: 'none', sm: 'flex' } }}
@@ -366,17 +285,17 @@ const App = () => {
                   <NotificationsIcon />
                 </Badge>
               </IconButton>
-            
-            <IconButton
-              color="inherit"
+              
+              <IconButton 
+                color="inherit" 
                 aria-label="settings"
                 size="large"
                 onClick={handleSettingsOpen}
                 sx={{ display: { xs: 'none', sm: 'flex' } }}
               >
                 <SettingsIcon />
-            </IconButton>
-            
+              </IconButton>
+              
               <IconButton
                 color="inherit"
                 aria-label="user profile"
@@ -437,8 +356,8 @@ const App = () => {
             
             <Box sx={{ p: 2 }}>
               <PhaseManager compact={true} />
-        </Box>
-        
+            </Box>
+            
             <Divider />
             
             <List sx={{ flexGrow: 1 }}>
@@ -547,12 +466,12 @@ const App = () => {
                   if (isMobile) toggleDrawer();
                 }}
                 disabled
-                    sx={{
-                      borderRadius: 1,
+                sx={{ 
+                  borderRadius: 1, 
                   m: 1,
                   '&.Mui-selected': {
                     bgcolor: 'rgba(204, 32, 48, 0.08)',
-                      '&:hover': {
+                    '&:hover': {
                       bgcolor: 'rgba(204, 32, 48, 0.12)'
                     }
                   }
@@ -586,11 +505,11 @@ const App = () => {
             }}>
               <Typography variant="caption" color="text.secondary" align="center">
                 PCI Quality Reorganization Tool
-                      </Typography>
+              </Typography>
               <Typography variant="caption" color="text.secondary" align="center">
                 Version 2.0
-                      </Typography>
-                    </Box>
+              </Typography>
+            </Box>
           </Box>
         </Drawer>
         
@@ -642,18 +561,23 @@ const App = () => {
             height: isMobile ? 'calc(100vh - 130px)' : 'calc(100vh - 90px)'
           }}>
             {renderTabContent()}
-                  </Box>
-              </Box>
+          </Box>
+        </Box>
       </Box>
       
-      {/* Menus */}
+      {/* Notifications Menu */}
       <Menu
         anchorEl={notificationsAnchorEl}
         open={Boolean(notificationsAnchorEl)}
         onClose={handleNotificationsClose}
         PaperProps={{
           elevation: 3,
-          sx: { mt: 1.5, width: 320 }
+          sx: { 
+            mt: 1.5, 
+            width: 320,
+            maxHeight: 400,
+            overflow: 'auto'
+          }
         }}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
@@ -692,6 +616,21 @@ const App = () => {
           </Box>
         </MenuItem>
         
+        <MenuItem onClick={handleNotificationsClose}>
+          <Box sx={{ width: '100%' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+              <Typography variant="subtitle2">Process Flow Updated</Typography>
+              <Chip size="small" label="New" color="primary" />
+            </Box>
+            <Typography variant="body2" color="text.secondary">
+              The quality approval process has been updated.
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              3 hours ago
+            </Typography>
+          </Box>
+        </MenuItem>
+        
         <Box sx={{ p: 1.5, textAlign: 'center', borderTop: '1px solid', borderColor: 'divider' }}>
           <Button size="small" onClick={handleNotificationsClose}>
             View All Notifications
@@ -699,6 +638,7 @@ const App = () => {
         </Box>
       </Menu>
       
+      {/* Settings Menu */}
       <Menu
         anchorEl={settingsAnchorEl}
         open={Boolean(settingsAnchorEl)}
@@ -716,19 +656,23 @@ const App = () => {
           </ListItemIcon>
           Save Current State
         </MenuItem>
+        
         <MenuItem onClick={handleSettingsClose}>
           <ListItemIcon>
             <DownloadIcon fontSize="small" />
           </ListItemIcon>
           Export Configuration
         </MenuItem>
+        
         <MenuItem onClick={handleSettingsClose}>
           <ListItemIcon>
             <UploadIcon fontSize="small" />
           </ListItemIcon>
           Import Configuration
         </MenuItem>
+        
         <Divider />
+        
         <MenuItem onClick={handleSettingsClose}>
           <ListItemIcon>
             <SettingsIcon fontSize="small" />
@@ -737,6 +681,7 @@ const App = () => {
         </MenuItem>
       </Menu>
       
+      {/* User Menu */}
       <Menu
         anchorEl={userMenuAnchorEl}
         open={Boolean(userMenuAnchorEl)}
@@ -766,7 +711,9 @@ const App = () => {
             </Typography>
           </Box>
         </Box>
+        
         <Divider />
+        
         <MenuItem onClick={handleUserMenuClose}>My Profile</MenuItem>
         <MenuItem onClick={handleUserMenuClose}>Account Settings</MenuItem>
         <Divider />
